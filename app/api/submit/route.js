@@ -23,10 +23,12 @@ export async function POST(request) {
 
 export async function GET() {
   try {
-    const response = await fetch(GOOGLE_SCRIPT_URL);
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
+      cache: 'no-store'
+    });
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, total: 0, stats: [], error: error.message }, { status: 500 });
   }
 }
