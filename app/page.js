@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const PharmacyQuestionnaire = () => {
   const [currentSection, setCurrentSection] = useState(0);
@@ -375,29 +375,41 @@ const PharmacyQuestionnaire = () => {
     return value;
   };
 
-  // Mock data สำหรับแสดงจำนวนผู้ตอบแต่ละรุ่น - เรียงจากมากไปน้อย
-  const responsesByRx = [
-    { rx: 'นศ. ปัจจุบัน', count: 55 },
-    { rx: 'Rx34', count: 45 },
-    { rx: 'Rx36', count: 42 },
-    { rx: 'Rx35', count: 38 },
-    { rx: 'Rx31', count: 35 },
-    { rx: 'Rx33', count: 32 },
-    { rx: 'Rx30', count: 30 },
-    { rx: 'Rx29', count: 28 },
-    { rx: 'Rx32', count: 28 },
-    { rx: 'Rx37', count: 25 },
-    { rx: 'Rx28', count: 25 },
-    { rx: 'Rx38', count: 22 },
-    { rx: 'Rx27', count: 20 },
-    { rx: 'Rx39', count: 18 },
-    { rx: 'Rx26', count: 15 },
-    { rx: 'Rx25', count: 12 },
-    { rx: 'Rx1-24', count: 8 },
-  ].sort((a, b) => b.count - a.count);
+  // State สำหรับเก็บสถิติจาก API
+  const [statsData, setStatsData] = useState({ total: 0, stats: [] });
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
 
-  const maxCount = Math.max(...responsesByRx.map(r => r.count));
-  const totalResponses = responsesByRx.reduce((sum, r) => sum + r.count, 0);
+  // ดึงสถิติจาก API
+  const fetchStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const response = await fetch('/api/submit');
+      const data = await response.json();
+      if (data.success) {
+        setStatsData({ total: data.total || 0, stats: data.stats || [] });
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+    setIsLoadingStats(false);
+  };
+
+  // ดึงสถิติเมื่อโหลดหน้า และเมื่อ submit สำเร็จ
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      fetchStats();
+    }
+  }, [isSubmitted]);
+
+  // ใช้ข้อมูลจาก API หรือ default ถ้ายังไม่มี
+  const responsesByRx = statsData.stats.length > 0 ? statsData.stats : [
+    { rx: 'ยังไม่มีข้อมูล', count: 0 }
+  ];
+  const totalResponses = statsData.total;
 
   // สีสำหรับ Top 3 และอื่นๆ
   const getRankStyle = (index) => {
