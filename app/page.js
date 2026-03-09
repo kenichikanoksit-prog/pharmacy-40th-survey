@@ -38,6 +38,7 @@ const PharmacyQuestionnaire = () => {
   const [adminPassword, setAdminPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [adminTab, setAdminTab] = useState('dashboard');
+  const [showStatsModal, setShowStatsModal] = useState(false);
 
   // Mock responses data for admin dashboard
   const [allResponses] = useState([
@@ -675,6 +676,18 @@ const PharmacyQuestionnaire = () => {
         <p className="text-gray-400 text-sm">
           แบบสำรวจความคิดเห็นเพื่อการจัดงานที่ตรงใจทุกท่าน
         </p>
+        {/* ปุ่มดูสถิติ */}
+        <button
+          onClick={() => setShowStatsModal(true)}
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, rgba(79, 195, 247, 0.2), rgba(233, 69, 96, 0.2))',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}
+        >
+          <span>📊</span>
+          <span className="text-white">ดูสถิติรุ่นที่ตอบแบบสอบถาม</span>
+        </button>
       </div>
 
       {/* Progress Bar */}
@@ -1409,6 +1422,81 @@ const PharmacyQuestionnaire = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </button>
+
+      {/* Stats Modal */}
+      {showStatsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4" onClick={() => setShowStatsModal(false)}>
+          <div 
+            className="rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto" 
+            style={{
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span>📊</span> สถิติรุ่นที่ตอบแบบสอบถาม
+              </h3>
+              <button 
+                onClick={() => setShowStatsModal(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            {/* Total Count */}
+            <div className="rounded-xl p-4 mb-4 text-center" style={{
+              background: 'linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(79, 195, 247, 0.2))',
+              border: '1px solid rgba(255, 255, 255, 0.15)'
+            }}>
+              <div className="text-3xl font-bold text-white mb-1">{totalResponses}</div>
+              <div className="text-sm text-gray-300">คนร่วมตอบแบบสอบถามแล้ว 🎉</div>
+            </div>
+
+            {/* Ranking */}
+            <div className="space-y-2">
+              {responsesByRx.map((item, index) => {
+                const maxCount = responsesByRx[0].count;
+                const barStyle = getRankStyle(index);
+                return (
+                  <div key={item.rx} className="flex items-center gap-2">
+                    <div className="w-6 text-center flex-shrink-0">
+                      {barStyle.medal ? (
+                        <span className="text-sm">{barStyle.medal}</span>
+                      ) : (
+                        <span className="text-gray-500 text-xs">{index + 1}</span>
+                      )}
+                    </div>
+                    <div className="w-20 text-xs text-gray-400 text-right flex-shrink-0">{item.rx}</div>
+                    <div className="flex-1 h-6 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div 
+                        className="h-full rounded-full flex items-center justify-end pr-2"
+                        style={{ 
+                          width: `${(item.count / maxCount) * 100}%`,
+                          background: barStyle.bg
+                        }}
+                      >
+                        <span className="text-white text-xs font-bold">{item.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setShowStatsModal(false)}
+              className="w-full mt-6 py-3 rounded-full text-white font-medium"
+              style={{ background: 'linear-gradient(135deg, #e94560, #ff6b6b)' }}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Admin Login Modal */}
       {showAdminLogin && !isAdminLoggedIn && (
