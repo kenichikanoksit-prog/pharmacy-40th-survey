@@ -408,60 +408,119 @@ const PharmacyQuestionnaire = () => {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen p-4 flex items-center justify-center" style={{
+      <div className="min-h-screen p-4" style={{
         background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
         fontFamily: "'Prompt', 'Sarabun', sans-serif"
       }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+          
+          .bar-animate {
+            animation: growBar 1s ease-out forwards;
+          }
+          
+          @keyframes growBar {
+            from { width: 0; }
+          }
+          
+          .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+          }
+          
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
         `}</style>
         
-        <div className="max-w-md mx-auto text-center">
-          {/* Success Icon */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style={{
-            background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1))',
-            border: '2px solid rgba(76, 175, 80, 0.5)'
-          }}>
-            <span className="text-4xl">✅</span>
-          </div>
-
-          {/* Thank You Message */}
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-            ขอบคุณสำหรับการตอบแบบสอบถาม
-          </h2>
-          
-          <p className="text-gray-400 mb-6">
-            ข้อมูลของท่านถูกบันทึกเรียบร้อยแล้ว
-          </p>
-
-          {/* Event Info */}
-          <div className="rounded-2xl p-5 mb-6" style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div className="text-3xl mb-2">💊</div>
-            <div className="text-white font-bold text-lg">งานครบรอบ 40 ปี</div>
-            <div className="text-gray-300 mb-3">เภสัชศาสตร์ มหาวิทยาลัยรังสิต</div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" style={{
-              background: 'rgba(128, 128, 0, 0.2)',
-              border: '1px solid rgba(128, 128, 0, 0.3)'
+        <div className="max-w-2xl mx-auto">
+          {/* Thank You Header */}
+          <div className="text-center pt-6 pb-4 fade-in-up">
+            <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center rounded-full" style={{
+              background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(76, 175, 80, 0.1))',
+              border: '2px solid rgba(76, 175, 80, 0.5)'
             }}>
-              <span>📅</span>
-              <span className="text-white font-medium">20 มิถุนายน 2569</span>
+              <span className="text-3xl">✅</span>
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-1">
+              ขอบคุณสำหรับการตอบแบบสอบถาม
+            </h2>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mt-2" style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <span className="text-sm">📅</span>
+              <span className="text-white font-medium text-xs">พบกัน 20 มิถุนายน 2569</span>
             </div>
           </div>
 
-          {/* CTA */}
-          <div className="inline-block px-8 py-3 rounded-full text-white font-semibold" style={{
-            background: 'linear-gradient(135deg, #e94560, #ff6b6b)'
+          {/* Total Count Card */}
+          <div className="rounded-2xl p-4 mb-4 text-center fade-in-up" style={{
+            background: 'linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(79, 195, 247, 0.2))',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            animationDelay: '0.1s'
           }}>
-            🎉 พบกันในงาน!
+            <div className="text-4xl md:text-5xl font-bold text-white mb-1">
+              {totalResponses}
+            </div>
+            <div className="text-sm text-gray-300">คนร่วมตอบแบบสอบถามแล้ว 🎉</div>
           </div>
 
-          {/* Close Message */}
-          <p className="text-gray-500 text-sm mt-6">
-            สามารถปิดหน้านี้ได้เลยครับ
-          </p>
+          {/* Ranking by Rx */}
+          <div className="rounded-2xl p-4 mb-4 fade-in-up" style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            animationDelay: '0.3s'
+          }}>
+            <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+              <span>🏆</span> อันดับรุ่นที่ตอบมากที่สุด
+            </h3>
+            <div className="space-y-2">
+              {responsesByRx.map((item, index) => {
+                const maxCount = responsesByRx[0].count;
+                const barStyle = getRankStyle(index);
+                return (
+                  <div key={item.rx} className="flex items-center gap-2">
+                    <div className="w-6 text-center flex-shrink-0">
+                      {barStyle.medal ? (
+                        <span className="text-sm">{barStyle.medal}</span>
+                      ) : (
+                        <span className="text-gray-500 text-xs">{index + 1}</span>
+                      )}
+                    </div>
+                    <div className="w-16 text-xs text-gray-400 text-right flex-shrink-0">{item.rx}</div>
+                    <div className="flex-1 h-5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                      <div 
+                        className="h-full rounded-full bar-animate flex items-center justify-end pr-2"
+                        style={{ 
+                          width: `${(item.count / maxCount) * 100}%`,
+                          background: barStyle.bg,
+                          animationDelay: `${0.5 + index * 0.1}s`
+                        }}
+                      >
+                        <span className="text-white text-xs font-bold">{item.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* CTA Button */}
+          <div className="text-center pb-4 fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <div className="inline-block px-6 py-3 rounded-full text-white font-semibold text-sm" style={{
+              background: 'linear-gradient(135deg, #e94560, #ff6b6b)'
+            }}>
+              🎉 พบกันในงาน!
+            </div>
+          </div>
+
+          {/* ข้อความปิดหน้า */}
+          <div className="text-center pb-6 fade-in-up" style={{ animationDelay: '0.9s' }}>
+            <p className="text-gray-500 text-sm">สามารถปิดหน้านี้ได้เลยครับ</p>
+          </div>
         </div>
       </div>
     );
