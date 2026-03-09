@@ -44,30 +44,49 @@ const PharmacyQuestionnaire = () => {
   const [allResponses, setAllResponses] = useState([]);
   const [isLoadingResponses, setIsLoadingResponses] = useState(false);
 
+  // Stats data from Google Sheet  
+  const [statsData, setStatsData] = useState({ total: 0, stats: [] });
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
+
   // Admin credentials
   const ADMIN_USER = '40RxRSU';
   const ADMIN_PASS = 'RxRSU2026';
 
-  // ดึงข้อมูล responses เมื่อ login admin
-  const fetchResponses = async () => {
+  // ดึงข้อมูลทั้งหมดจาก API (stats + responses)
+  const fetchAllData = async () => {
+    setIsLoadingStats(true);
     setIsLoadingResponses(true);
     try {
-      const response = await fetch('/api/responses');
+      const response = await fetch('/api/submit', { cache: 'no-store' });
       const data = await response.json();
-      if (data.success && data.data) {
-        setAllResponses(data.data);
+      if (data.success) {
+        setStatsData({ total: data.total || 0, stats: data.stats || [] });
+        setAllResponses(data.responses || []);
       }
     } catch (error) {
-      console.error('Error fetching responses:', error);
+      console.error('Error fetching data:', error);
     }
+    setIsLoadingStats(false);
     setIsLoadingResponses(false);
   };
+
+  // ดึงข้อมูลเมื่อโหลดหน้า
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  // ดึงข้อมูลใหม่เมื่อ submit สำเร็จ
+  useEffect(() => {
+    if (isSubmitted) {
+      setTimeout(() => fetchAllData(), 1000); // รอ 1 วินาทีให้ Google Sheet อัปเดต
+    }
+  }, [isSubmitted]);
 
   const handleAdminLogin = () => {
     if (adminUsername === ADMIN_USER && adminPassword === ADMIN_PASS) {
       setIsAdminLoggedIn(true);
       setLoginError('');
-      fetchResponses(); // ดึงข้อมูลเมื่อ login สำเร็จ
+      fetchAllData(); // ดึงข้อมูลเมื่อ login สำเร็จ
     } else {
       setLoginError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     }
@@ -383,40 +402,8 @@ const PharmacyQuestionnaire = () => {
     return value;
   };
 
-  // State สำหรับเก็บสถิติจาก API
-  const [statsData, setStatsData] = useState({ total: 0, stats: [] });
-  const [isLoadingStats, setIsLoadingStats] = useState(false);
-
-  // ดึงสถิติจาก API
-  const fetchStats = async () => {
-    setIsLoadingStats(true);
-    try {
-      const response = await fetch('/api/submit');
-      const data = await response.json();
-      if (data.success) {
-        setStatsData({ total: data.total || 0, stats: data.stats || [] });
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    }
-    setIsLoadingStats(false);
-  };
-
-  // ดึงสถิติเมื่อโหลดหน้า และเมื่อ submit สำเร็จ
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    if (isSubmitted) {
-      fetchStats();
-    }
-  }, [isSubmitted]);
-
-  // ใช้ข้อมูลจาก API หรือ default ถ้ายังไม่มี
-  const responsesByRx = statsData.stats.length > 0 ? statsData.stats : [
-    { rx: 'ยังไม่มีข้อมูล', count: 0 }
-  ];
+  // ใช้ข้อมูลจาก statsData
+  const responsesByRx = statsData.stats.length > 0 ? statsData.stats : [{ rx: 'ยังไม่มีข้อมูล', count: 0 }];
   const totalResponses = statsData.total;
 
   // สีสำหรับ Top 3 และอื่นๆ
