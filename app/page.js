@@ -40,26 +40,34 @@ const PharmacyQuestionnaire = () => {
   const [adminTab, setAdminTab] = useState('dashboard');
   const [showStatsModal, setShowStatsModal] = useState(false);
 
-  // Mock responses data for admin dashboard
-  const [allResponses] = useState([
-    { id: 1, fullName: 'สมชาย ใจดี', status: 'alumni', rxGeneration: 'Rx34', workplace: 'รพ.รามาธิบดี', province: 'กรุงเทพฯ', phone: '081-234-5678', interestedToJoin: 'yes', preferredTime: 'morning', disciplines: ['hospital', 'ai'], seminarTopics: ['brain', 'bioage'], presentationFormats: ['lecture'], alumniBenefits: ['cpe_discount', 'health'], otherBenefits: '', feeFullPackage: '2500-3000', feeConferenceOnly: '1000-1200', feePartyOnly: '1200-1500', boothActivities: ['bioage', 'brainapp'], timestamp: '2025-03-01 10:30' },
-    { id: 2, fullName: 'สมหญิง รักเรียน', status: 'alumni', rxGeneration: 'Rx36', workplace: 'บ.ไฟเซอร์', province: 'กรุงเทพฯ', phone: '082-345-6789', interestedToJoin: 'yes', preferredTime: 'afternoon', disciplines: ['marketing', 'newdrug'], seminarTopics: ['pharmacogenomics'], presentationFormats: ['panel'], alumniBenefits: ['networking'], otherBenefits: 'ส่วนลดร้านค้าพันธมิตร', feeFullPackage: '2000-2500', feeConferenceOnly: '800-1000', feePartyOnly: '1000-1200', boothActivities: ['networking'], timestamp: '2025-03-01 14:22' },
-    { id: 3, fullName: 'วิชัย เก่งกาจ', status: 'current', currentYear: 'ปี 5', workplace: 'มหาวิทยาลัยรังสิต', province: 'ปทุมธานี', phone: '083-456-7890', interestedToJoin: 'yes', preferredTime: 'morning', disciplines: ['ai', 'digital'], seminarTopics: ['brain', 'ecosystem'], presentationFormats: ['showcase'], alumniBenefits: ['cpe_discount', 'networking'], otherBenefits: '', feeFullPackage: '2000-2500', feeConferenceOnly: '800-1000', feePartyOnly: '1000-1200', boothActivities: ['brainapp', 'products'], timestamp: '2025-03-02 09:15' },
-    { id: 4, fullName: 'มานี มีสุข', status: 'alumni', rxGeneration: 'Rx31', workplace: 'ร้านยาฟาสซิโน', province: 'เชียงใหม่', phone: '084-567-8901', interestedToJoin: 'yes', preferredTime: 'afternoon', disciplines: ['community', 'nutraceuticals'], seminarTopics: ['herbal', 'metabolism'], presentationFormats: ['sharing'], alumniBenefits: ['health', 'networking'], otherBenefits: '', feeFullPackage: '2500-3000', feeConferenceOnly: '1000-1200', feePartyOnly: '1200-1500', boothActivities: ['products', 'memory'], timestamp: '2025-03-02 16:45' },
-    { id: 5, fullName: 'ประเสริฐ ยิ่งใหญ่', status: 'alumni', rxGeneration: 'Rx29', workplace: 'สำนักงาน อย.', province: 'นนทบุรี', phone: '085-678-9012', interestedToJoin: 'no', preferredTime: '', disciplines: ['regulatory'], seminarTopics: ['leadership'], presentationFormats: ['lecture'], alumniBenefits: ['cpe_discount'], otherBenefits: '', feeFullPackage: '3000-3500', feeConferenceOnly: '1200-1500', feePartyOnly: '1500-1800', boothActivities: [], timestamp: '2025-03-03 11:30' },
-    { id: 6, fullName: 'นภา สวยงาม', status: 'alumni', rxGeneration: 'Rx35', workplace: 'คลินิกความงาม', province: 'กรุงเทพฯ', phone: '086-789-0123', interestedToJoin: 'yes', preferredTime: 'morning', disciplines: ['aesthetic', 'weight'], seminarTopics: ['bioage', 'metabolism'], presentationFormats: ['interview'], alumniBenefits: ['health', 'cpe_discount'], otherBenefits: '', feeFullPackage: '2500-3000', feeConferenceOnly: '1000-1200', feePartyOnly: '1200-1500', boothActivities: ['bioage'], timestamp: '2025-03-03 14:00' },
-    { id: 7, fullName: 'กิตติ รุ่งเรือง', status: 'alumni', rxGeneration: 'Rx34', workplace: 'รพ.ศิริราช', province: 'กรุงเทพฯ', phone: '087-890-1234', interestedToJoin: 'yes', preferredTime: 'afternoon', disciplines: ['hospital', 'vaccine'], seminarTopics: ['brain'], presentationFormats: ['panel', 'lecture'], alumniBenefits: ['cpe_discount', 'networking', 'health'], otherBenefits: '', feeFullPackage: '2500-3000', feeConferenceOnly: '1000-1200', feePartyOnly: '1500-1800', boothActivities: ['brainapp', 'networking'], timestamp: '2025-03-04 10:00' },
-    { id: 8, fullName: 'พิมพ์ใจ ดีเลิศ', status: 'current', currentYear: 'ปี 6', workplace: 'มหาวิทยาลัยรังสิต', province: 'ปทุมธานี', phone: '088-901-2345', interestedToJoin: 'yes', preferredTime: 'morning', disciplines: ['industrial', 'cannabis'], seminarTopics: ['herbal'], presentationFormats: ['showcase'], alumniBenefits: ['networking'], otherBenefits: 'ทุนการศึกษา', feeFullPackage: '2000-2500', feeConferenceOnly: '800-1000', feePartyOnly: '1000-1200', boothActivities: ['products'], timestamp: '2025-03-04 15:30' },
-  ]);
+  // Responses data from Google Sheet
+  const [allResponses, setAllResponses] = useState([]);
+  const [isLoadingResponses, setIsLoadingResponses] = useState(false);
 
   // Admin credentials
   const ADMIN_USER = '40RxRSU';
   const ADMIN_PASS = 'RxRSU2026';
 
+  // ดึงข้อมูล responses เมื่อ login admin
+  const fetchResponses = async () => {
+    setIsLoadingResponses(true);
+    try {
+      const response = await fetch('/api/responses');
+      const data = await response.json();
+      if (data.success && data.data) {
+        setAllResponses(data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching responses:', error);
+    }
+    setIsLoadingResponses(false);
+  };
+
   const handleAdminLogin = () => {
     if (adminUsername === ADMIN_USER && adminPassword === ADMIN_PASS) {
       setIsAdminLoggedIn(true);
       setLoginError('');
+      fetchResponses(); // ดึงข้อมูลเมื่อ login สำเร็จ
     } else {
       setLoginError('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     }
