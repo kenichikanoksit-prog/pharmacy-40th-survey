@@ -861,10 +861,15 @@ const PharmacyQuestionnaire = () => {
                     {formData.status === 'alumni' && (
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         className="input-field w-full px-3 py-2 rounded-lg text-white outline-none mt-3 text-sm"
-                        placeholder="ระบุรุ่น Rx (เช่น Rx12)"
+                        placeholder="ระบุรุ่น (ตัวเลข เช่น 12)"
                         value={formData.rxGeneration}
-                        onChange={(e) => handleInputChange('rxGeneration', e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          handleInputChange('rxGeneration', val);
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       />
                     )}
@@ -884,10 +889,15 @@ const PharmacyQuestionnaire = () => {
                     {formData.status === 'current' && (
                       <input
                         type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         className="input-field w-full px-3 py-2 rounded-lg text-white outline-none mt-3 text-sm"
-                        placeholder="ระบุชั้นปี (เช่น ปี 3)"
+                        placeholder="ระบุชั้นปี (ตัวเลข เช่น 3)"
                         value={formData.currentYear}
-                        onChange={(e) => handleInputChange('currentYear', e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          handleInputChange('currentYear', val);
+                        }}
                         onClick={(e) => e.stopPropagation()}
                       />
                     )}
