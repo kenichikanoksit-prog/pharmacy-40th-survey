@@ -364,7 +364,38 @@ const PharmacyQuestionnaire = () => {
     setCurrentSection(sectionIndex);
   };
 
+  const [validationError, setValidationError] = useState('');
+
   const nextSection = () => {
+    // Validation สำหรับ Section 1
+    if (currentSection === 0) {
+      if (!formData.fullName.trim()) {
+        setValidationError('กรุณากรอกชื่อ-นามสกุล');
+        return;
+      }
+      if (!formData.status) {
+        setValidationError('กรุณาเลือกสถานะ');
+        return;
+      }
+      if (formData.status === 'alumni' && !formData.rxGeneration.trim()) {
+        setValidationError('กรุณากรอกรุ่น (ตัวเลข)');
+        return;
+      }
+      if (formData.status === 'current' && !formData.currentYear.trim()) {
+        setValidationError('กรุณากรอกชั้นปี (ตัวเลข)');
+        return;
+      }
+      if (!formData.phone.trim()) {
+        setValidationError('กรุณากรอกเบอร์โทรศัพท์');
+        return;
+      }
+      if (!formData.interestedToJoin) {
+        setValidationError('กรุณาเลือกว่าสนใจร่วมงานหรือไม่');
+        return;
+      }
+    }
+    
+    setValidationError('');
     if (currentSection < sections.length - 1) {
       setCurrentSection(currentSection + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1306,6 +1337,16 @@ const PharmacyQuestionnaire = () => {
               ← ย้อนกลับ
             </button>
             
+            {/* Validation Error */}
+            {validationError && (
+              <div className="mb-4 p-3 rounded-xl text-center" style={{
+                background: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid rgba(239, 68, 68, 0.5)'
+              }}>
+                <span className="text-red-400 text-sm">⚠️ {validationError}</span>
+              </div>
+            )}
+
             {currentSection === sections.length - 1 ? (
               <button
                 onClick={handlePreSubmit}
